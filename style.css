@@ -1,3 +1,23 @@
 #root {
-  color: red;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  background: #fff;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+#DataSourceWebsite {
+  text-align: center;
+  margin-top:20px;
 }

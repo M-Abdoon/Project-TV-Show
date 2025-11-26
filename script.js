@@ -6,7 +6,16 @@ function setup() {
 
 function makePageForEpisodes(episodeList) {
   const rootElem = document.getElementById("root");
-  rootElem.textContent = `Got ${episodeList.length} episode(s)`;
+  rootElem.innerHTML = "";
+
+  episodeList.forEach(episode => {
+    const card = document.createElement("div");
+    card.textContent = `Name: ${episode.name}`;
+
+
+
+    rootElem.appendChild(card);
+  });
 }
 
 window.onload = setup;
