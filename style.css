@@ -5,16 +5,24 @@
   padding: 20px;
 }
 
-.card {
+#card {
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 15px;
   background: #fff;
 }
 
-.card img {
+#card h3 {
+  text-align: center;
+}
+
+#card img {
   width: 100%;
   border-radius: 8px;
+}
+
+#card p {
+  text-align: justify;
 }
 
 #DataSourceWebsite {
