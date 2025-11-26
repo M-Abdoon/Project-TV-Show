@@ -1,5 +1,5 @@
 body {
-  background: #747373;
+  background: #a3a3a3;
 }
 #root {
   display: grid;
@@ -33,4 +33,8 @@ body {
 #DataSourceWebsite {
   text-align: center;
   margin-top:20px;
+}
+
+#DataSourceWebsite a {
+  color: #060b51
 }
