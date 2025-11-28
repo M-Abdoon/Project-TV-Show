@@ -11,6 +11,12 @@ body {
   border-radius: 3px;
   margin-right: 25px;
 }
+#searchSelect{
+  height: 56px;
+  width: 300px;
+  border-radius: 3px;
+  margin-right: 25px;
+}
 #root {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

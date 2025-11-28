@@ -8,6 +8,27 @@ function setup() {
     const searchWord = searchInput.value.toLowerCase();
     searchEpisodes(allEpisodes, searchWord);
   });
+
+  for( const episode of allEpisodes){
+    createOption(episode);
+  }
+  const select = document.getElementById("searchSelect");
+  select.addEventListener("change", () => {
+    const episodeId = select.value;
+    if (episodeId == "all"){
+      makePageForEpisodes(allEpisodes); 
+    }
+    else {
+      const selectedEpisode = [];
+      for (const episode of allEpisodes){
+        if (episode.id == episodeId){
+          selectedEpisode.push(episode);
+        }
+      }
+      makePageForEpisodes(selectedEpisode); 
+    }
+  });
+  
 }
 
 function makePageForEpisodes(episodeList) {
@@ -41,6 +62,16 @@ function searchEpisodes(allEpisodes, searchWord){
   currentDisplaying.textContent = result.length + "/" + allEpisodes.length;
 }
 
+function createOption(episode){
+  const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.season).padStart(2, "0")}`;
+  const option = document.createElement("option")
+  option.textContent = episodeCode + " - "+ episode.name;
+  option.value = episode.id;
+  const select = document.getElementById("searchSelect");
+  select.appendChild(option);
+}
+
 
 
 window.onload = setup;
+searchSelect
