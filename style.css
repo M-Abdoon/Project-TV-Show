@@ -1,6 +1,16 @@
 body {
   background: #a3a3a3;
 }
+#search{
+  padding: 20px;
+  display: flex;
+}
+#search input{
+  height: 50px;
+  width: 300px;
+  border-radius: 3px;
+  margin-right: 25px;
+}
 #root {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -8,24 +18,24 @@ body {
   padding: 20px;
 }
 
-#card {
+.card {
   border: 1px solid #000000;
   border-radius: 10px;
   padding: 15px;
   background: #f8f8f8;
 }
 
-#card h3 {
+.card h3 {
   color: #333;
   text-align: center;
 }
 
-#card img {
+.card img {
   width: 100%;
   border-radius: 8px;
 }
 
-#card p {
+.card p {
   color: #555;
   text-align: justify;
 }
