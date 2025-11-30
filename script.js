@@ -2,6 +2,33 @@
 function setup() {
   const allEpisodes = getAllEpisodes();
   makePageForEpisodes(allEpisodes);
+
+  const searchInput = document.getElementById("search-input");
+  searchInput.addEventListener("input", () => {
+    const searchWord = searchInput.value.toLowerCase();
+    searchEpisodes(allEpisodes, searchWord);
+  });
+
+  for( const episode of allEpisodes){
+    createOption(episode);
+  }
+  const select = document.getElementById("searchSelect");
+  select.addEventListener("change", () => {
+    const episodeId = select.value;
+    if (episodeId == "all"){
+      makePageForEpisodes(allEpisodes); 
+    }
+    else {
+      const selectedEpisode = [];
+      for (const episode of allEpisodes){
+        if (episode.id == episodeId){
+          selectedEpisode.push(episode);
+        }
+      }
+      makePageForEpisodes(selectedEpisode); 
+    }
+  });
+  
 }
 
 function makePageForEpisodes(episodeList) {
@@ -11,7 +38,7 @@ function makePageForEpisodes(episodeList) {
 
   episodeList.forEach(episode => {
     const card = document.createElement("div");
-    card.id = "card";
+    card.classList.add("card");
 
     const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.season).padStart(2, "0")}`;
 
@@ -19,11 +46,32 @@ function makePageForEpisodes(episodeList) {
     <img src="${episode.image.medium}" alt="${episode.name}">
     <p>${episode.summary}</p>
     `;
-
-
-
     rootElem.appendChild(card);
   });
 }
 
+function searchEpisodes(allEpisodes, searchWord){
+  const result = [];
+  for ( const episode of allEpisodes){
+    if (episode.name.toLowerCase().includes(searchWord) || episode.summary.toLowerCase().includes(searchWord)){
+      result.push(episode);
+    }
+  }
+  makePageForEpisodes(result);
+  const currentDisplaying = document.getElementById("currentDisplaying");
+  currentDisplaying.textContent = result.length + "/" + allEpisodes.length;
+}
+
+function createOption(episode){
+  const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.season).padStart(2, "0")}`;
+  const option = document.createElement("option")
+  option.textContent = episodeCode + " - "+ episode.name;
+  option.value = episode.id;
+  const select = document.getElementById("searchSelect");
+  select.appendChild(option);
+}
+
+
+
 window.onload = setup;
+searchSelect
