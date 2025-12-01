@@ -1,6 +1,8 @@
 //You can edit ALL of the code here
+const response    = await fetch("https://api.tvmaze.com/shows/82/episodes");
+const allEpisodes = await response.json();
+
 function setup() {
-  const allEpisodes = getAllEpisodes();
   makePageForEpisodes(allEpisodes);
 
   const searchInput = document.getElementById("search-input");
