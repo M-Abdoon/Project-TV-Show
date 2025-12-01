@@ -10,15 +10,14 @@
 
   <body>
     <div id="search">
-      <select id="searchSelect">
+      <select id="searchSelect" aria-label="ExploreEpisodes">
          <option value="all">--Select all--</option>
       </select>
-      <input id="search-input" type="text">
-      <p>Displaying </p>
-      <p id="currentDisplaying">/</p>
-      <p>episodes</p>
+      <input id="search-input" type="text" aria-label="SearchEpisodes">
+      <p id="currentDisplaying"></p>
     </div>
     <div id="root">
+      <h3>Loading ...</h3>
     </div>
 
     <p id="DataSourceWebsite">

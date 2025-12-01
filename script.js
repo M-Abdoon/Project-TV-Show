@@ -1,8 +1,6 @@
 //You can edit ALL of the code here
-const response    = await fetch("https://api.tvmaze.com/shows/82/episodes");
-const allEpisodes = await response.json();
-
-function setup() {
+async function setup() {
+  const allEpisodes = await getData();
   makePageForEpisodes(allEpisodes);
 
   const searchInput = document.getElementById("search-input");
@@ -60,12 +58,17 @@ function searchEpisodes(allEpisodes, searchWord){
     }
   }
   makePageForEpisodes(result);
+  
   const currentDisplaying = document.getElementById("currentDisplaying");
-  currentDisplaying.textContent = result.length + "/" + allEpisodes.length;
+  currentDisplaying.textContent = "Displaying " + result.length + "/" + allEpisodes.length + " Episodes";
+
+  if (searchWord.length == 0) {
+    currentDisplaying.innerHTML = "";
+  }
 }
 
 function createOption(episode){
-  const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.season).padStart(2, "0")}`;
+  const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.number).padStart(2, "0")}`;
   const option = document.createElement("option")
   option.textContent = episodeCode + " - "+ episode.name;
   option.value = episode.id;
@@ -73,7 +76,22 @@ function createOption(episode){
   select.appendChild(option);
 }
 
+async function getData() {
+  const url = "https://api.tvmaze.com/shows/82/episodes";
+  try {
+    const response = await fetch(url);
+    if(!response.ok) {
+      alert("Server problem. Try again.");
+      return [];
+    }
+    const result = await response.json();
+    return result;
 
+  } catch (error) {
+    alert("Connection error. Try again.");
+    return []
+  }
+
+}
 
 window.onload = setup;
-searchSelect
