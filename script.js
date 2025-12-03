@@ -1,7 +1,35 @@
-//You can edit ALL of the code here
+let showContainer = {};
+
 async function setup() {
-  const allEpisodes = await getData();
+  let allShows = await getShows();
+  allShows.sort((a, b) => {
+  const nameA = a.name.toUpperCase(); 
+  const nameB = b.name.toUpperCase();
+  if (nameA < nameB) {
+    return -1;
+  }
+  if (nameA > nameB) {
+    return 1;
+  }
+  return 0;
+});
+  for (let show of allShows){
+    createShowOption(show);
+  }
+
+  const allEpisodes = await getData(allShows[0].id);
   makePageForEpisodes(allEpisodes);
+  const showSElect = document.getElementById("showSelect");
+  showSElect.addEventListener("change", async () =>{
+    const valueId = showSElect.value;
+    let showEpisodes;
+    if (Object.hasOwn(showContainer, valueId)){
+    showEpisodes = showContainer[valueId];
+    }
+    else{ showEpisodes = await getData(valueId);}
+    makePageForEpisodes(showEpisodes);
+  })
+  
 
   const searchInput = document.getElementById("search-input");
   searchInput.addEventListener("input", () => {
@@ -76,8 +104,34 @@ function createOption(episode){
   select.appendChild(option);
 }
 
-async function getData() {
-  const url = "https://api.tvmaze.com/shows/82/episodes";
+function createShowOption(show){
+  const option = document.createElement("option");
+  option.textContent = show.name;
+  option.value = show.id;
+  const select = document.getElementById("showSelect");
+  select.appendChild(option);
+}
+
+async function getData(id) {
+  const url = `https://api.tvmaze.com/shows/${id}/episodes`;
+  try {
+    const response = await fetch(url);
+    if(!response.ok) {
+      alert("Server problem. Try again.");
+      return [];
+    }
+    const result = await response.json();
+    return result;
+
+  } catch (error) {
+    alert("Connection error. Try again.");
+    return []
+  }
+
+}
+
+async function getShows(){
+  const url = "https://api.tvmaze.com/shows";
   try {
     const response = await fetch(url);
     if(!response.ok) {
