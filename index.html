@@ -10,10 +10,14 @@
 
   <body>
     <div id="search">
-      <select id="showSelect"></select>
-      <select id="searchSelect" aria-label="ExploreEpisodes">
+      <select id="showsSelect" aria-label="ExploreShows">
+        <option value="all">--Select all--</option>   
+      </select>
+
+      <select id="episodesSelect" aria-label="ExploreEpisodes">
          <option value="all">--Select all--</option>
       </select>
+
       <input id="search-input" type="text" aria-label="SearchEpisodes">
       <p id="currentDisplaying"></p>
     </div>

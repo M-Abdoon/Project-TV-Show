@@ -17,21 +17,12 @@ async function setup() {
     createShowOption(show);
   }
 
-  const allEpisodes = await getData(allShows[0].id);
+  let allEpisodes = await getData(allShows[0].id); // Default | for the first load
   makePageForEpisodes(allEpisodes);
-  const showSElect = document.getElementById("showSelect");
-  showSElect.addEventListener("change", async () =>{
-    const valueId = showSElect.value;
-    let showEpisodes;
-    if (Object.hasOwn(showContainer, valueId)){
-    showEpisodes = showContainer[valueId];
-    }
-    else{ showEpisodes = await getData(valueId);}
-    makePageForEpisodes(showEpisodes);
-  })
-  
-
+  const showsSelect = document.getElementById("showsSelect");
+  const episodesSelect      = document.getElementById("episodesSelect");
   const searchInput = document.getElementById("search-input");
+
   searchInput.addEventListener("input", () => {
     const searchWord = searchInput.value.toLowerCase();
     searchEpisodes(allEpisodes, searchWord);
@@ -40,9 +31,30 @@ async function setup() {
   for( const episode of allEpisodes){
     createOption(episode);
   }
-  const select = document.getElementById("searchSelect");
-  select.addEventListener("change", () => {
-    const episodeId = select.value;
+
+  let showEpisodes;
+  showsSelect.addEventListener("change", async () =>{
+    const valueId = showsSelect.value;
+    
+    if (Object.hasOwn(showContainer, valueId)){
+    allEpisodes = showContainer[valueId];
+    }
+    else{
+      allEpisodes = await getData(valueId);
+
+      document.getElementById("episodesSelect").innerHTML 
+      = `<option value="all">--Select all--</option>`;
+      for( const episode of allEpisodes){
+        createOption(episode);
+      }
+    }
+    makePageForEpisodes(allEpisodes);
+  })
+  
+
+  episodesSelect.addEventListener("change", async () => {
+    const episodeId = episodesSelect.value;
+
     if (episodeId == "all"){
       makePageForEpisodes(allEpisodes); 
     }
@@ -68,11 +80,19 @@ function makePageForEpisodes(episodeList) {
     const card = document.createElement("div");
     card.classList.add("card");
 
+    const episodeName = episode.name ?? "Name Unavailable";
+    let   episodeMediumImage = "img/placeholder.png";
+    const episodeSummary = episode.summary ?? "No Summary Available";
     const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.season).padStart(2, "0")}`;
 
-    card.innerHTML = `<h3>${episode.name} - ${episodeCode}</h3>
-    <img src="${episode.image.medium}" alt="${episode.name}">
-    <p>${episode.summary}</p>
+    if (episode.image && episode.image.medium)
+      episodeMediumImage = episode.image.medium;
+    else
+      console.log(episodeName);
+
+    card.innerHTML = `<h3>${episodeName} - ${episodeCode}</h3>
+    <img src="${episodeMediumImage}" alt="${episodeName}">
+    <p>${episodeSummary}</p>
     `;
     rootElem.appendChild(card);
   });
@@ -100,7 +120,7 @@ function createOption(episode){
   const option = document.createElement("option")
   option.textContent = episodeCode + " - "+ episode.name;
   option.value = episode.id;
-  const select = document.getElementById("searchSelect");
+  const select = document.getElementById("episodesSelect");
   select.appendChild(option);
 }
 
@@ -108,7 +128,7 @@ function createShowOption(show){
   const option = document.createElement("option");
   option.textContent = show.name;
   option.value = show.id;
-  const select = document.getElementById("showSelect");
+  const select = document.getElementById("showsSelect");
   select.appendChild(option);
 }
 
