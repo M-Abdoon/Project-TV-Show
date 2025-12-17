@@ -1,4 +1,5 @@
 let showContainer = {};
+let currentShowId = 0;
 
 async function setup() {
   let allShows = await getShows();
@@ -17,82 +18,93 @@ async function setup() {
     createShowOption(show);
   }
 
-  let allEpisodes = await getData(allShows[0].id); // Default | for the first load
-  makePageForEpisodes(allEpisodes);
+  makePageForShows(allShows);
+
+
+
+
+
+
+
+
+  //makePageForEpisodes(allEpisodes);
   const showsSelect = document.getElementById("showsSelect");
-  const episodesSelect      = document.getElementById("episodesSelect");
+  const episodesSelect = document.getElementById("episodesSelect");
   const searchInput = document.getElementById("search-input");
+
+  let allEpisodes = await getData(allShows[currentShowId].id); // Default | for the first load
+  for( const episode of allEpisodes){
+    createOption(episode);
+  }
 
   searchInput.addEventListener("input", () => {
     const searchWord = searchInput.value.toLowerCase();
     searchEpisodes(allEpisodes, searchWord);
   });
 
-  for( const episode of allEpisodes){
-    createOption(episode);
-  }
-
   showsSelect.addEventListener("change", async () =>{
-    const valueId = showsSelect.value;
+    currentShowId = showsSelect.value;
     document.getElementById("Loading").textContent = "Loading ...";
-    if (valueId === "all") {
-      makePageForEpisodes([]); // clear page
 
-      document.getElementById("episodesSelect").disabled=true;
-      document.getElementById("search-input").disabled=true;
-      document.getElementById("errorMessage").innerHTML =
-       `<div id="errorMessage">Please select a Show to display episodes</div>`;
+     
+    if (currentShowId === "all") {
+        makePageForShows(allShows);
+        document.getElementById("backToShowsBtn").style.display = "none";
+        document.getElementById("episodesSelect").disabled=true;
+        document.getElementById("search-input").disabled=false;
 
       return false;
     }
 
+    document.getElementById("backToShowsBtn").style.display = "inline-block";
     document.getElementById("episodesSelect").disabled=false;
     document.getElementById("search-input").disabled=false;
     document.getElementById("errorMessage").innerHTML = "";
 
-    if (Object.hasOwn(showContainer, valueId)){
-    allEpisodes = showContainer[valueId];
+    if (Object.hasOwn(showContainer, currentShowId)){
+    allEpisodes = showContainer[currentShowId];
     }
     else{
-      allEpisodes = await getData(valueId);
-
+      allEpisodes = await getData(currentShowId);
+        
       document.getElementById("episodesSelect").innerHTML 
       = `<option value="all">--Select all--</option>`;
       for( const episode of allEpisodes){
         createOption(episode);
       }
     }
-    makePageForEpisodes(allEpisodes);
+    makePageForEpisodes(currentShowId);
   })
   
-
   episodesSelect.addEventListener("change", async () => {
     const episodeId = episodesSelect.value;
 
     document.getElementById("Loading").textContent = "Loading ...";
     
     if (episodeId == "all"){
-      makePageForEpisodes(allEpisodes); 
+      makePageForEpisodes(currentShowId); 
     }
     else {
-      const selectedEpisode = [];
-      for (const episode of allEpisodes){
-        if (episode.id == episodeId){
-          selectedEpisode.push(episode);
+        const selectedEpisode = [];
+        for (const episode of allEpisodes){
+            if (episode.id == episodeId){
+            selectedEpisode.push(episode);
+            }
         }
-      }
-      makePageForEpisodes(selectedEpisode); 
+      displayEpisode(selectedEpisode); 
     }
   });
   
 }
 
-function makePageForEpisodes(episodeList) {
-  const rootElem = document.getElementById("root");
-  rootElem.innerHTML = "";
-  document.getElementById("Loading").innerHTML = "";
+function displayEpisode (selectedEpisode) {
+    document.getElementById("backToShowsBtn").style.display = "inline-block";
+    const rootElem = document.getElementById("root");
+    rootElem.innerHTML = "";
+    document.getElementById("Loading").innerHTML = "";
 
-  episodeList.forEach(episode => {
+    console.log(selectedEpisode);
+  selectedEpisode.forEach(episode => {
     const card = document.createElement("div");
     card.classList.add("card");
 
@@ -113,6 +125,72 @@ function makePageForEpisodes(episodeList) {
     rootElem.appendChild(card);
   });
 }
+function makePageForShows(allShows) {
+  const rootElem = document.getElementById("root");
+  rootElem.innerHTML = "";
+  document.getElementById("Loading").innerHTML = "";
+
+  allShows.forEach(show => {
+
+    const card = document.createElement("div");
+    card.classList.add("card");
+
+
+    card.innerHTML = `<h3>${show.name}</h3>
+    <img src="${show.image.medium}" alt="${show.name}">
+    <p>${show.summary}</p>
+    <p>genres: ${show.genres}</p>
+    <p>status: ${show.status}</p>
+    <p>rating: ${show.rating.average}</p>
+    <p>rating: ${show.runtime}</p>
+    `;
+
+    // add click listener
+    card.addEventListener("click", () => {
+        makePageForEpisodes(show.id);
+    });
+
+    rootElem.appendChild(card);
+  });
+}
+
+async function makePageForEpisodes(showId) {
+    let episodeList = await getData(showId);
+  const rootElem = document.getElementById("root");
+  rootElem.innerHTML = "";
+  document.getElementById("Loading").innerHTML = "";
+  document.getElementById("backToShowsBtn").style.display = "inline-block";
+  document.getElementById("episodesSelect").innerHTML = `<option value="all">--Select all--</option>`;
+
+  for( const episode of episodeList){
+    createOption(episode);
+  }
+
+  episodeList.forEach(episode => {
+    const card = document.createElement("div");
+    card.classList.add("card");
+
+    const episodeName = episode.name ?? "Name Unavailable";
+    let   episodeMediumImage = "img/placeholder.png";
+    const episodeSummary = episode.summary ?? "No Summary Available";
+    const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.season).padStart(2, "0")}`;
+
+    if (episode.image && episode.image.medium)
+      episodeMediumImage = episode.image.medium;
+    else
+      console.log(episodeName);
+
+    card.innerHTML = `<h3>${episodeName} - ${episodeCode}</h3>
+    <img src="${episodeMediumImage}" alt="${episodeName}">
+    <p>${episodeSummary}</p>
+    `;
+    rootElem.appendChild(card);
+
+    card.addEventListener("click", () => {
+        displayEpisode([episode]);
+    });
+  });
+}
 
 function searchEpisodes(allEpisodes, searchWord){
   const result = [];
@@ -121,7 +199,7 @@ function searchEpisodes(allEpisodes, searchWord){
       result.push(episode);
     }
   }
-  makePageForEpisodes(result);
+  displayEpisode(result);
   
   const currentDisplaying = document.getElementById("currentDisplaying");
   currentDisplaying.textContent = "Displaying " + result.length + "/" + allEpisodes.length + " Episodes";
@@ -131,9 +209,26 @@ function searchEpisodes(allEpisodes, searchWord){
   }
 }
 
+function searchShows(allShows, searchWord){
+  const result = [];
+  for ( const show of allShows){
+    if (show.name.toLowerCase().includes(searchWord) || show.summary.toLowerCase().includes(searchWord)){
+      result.push(show);
+    }
+  }
+  displayEpisode(result);
+  
+  const currentDisplaying = document.getElementById("currentDisplaying");
+  currentDisplaying.textContent = "Displaying " + result.length + "/" + allEpisodes.length + " Shows";
+
+  if (searchWord.length == 0) {
+    currentDisplaying.innerHTML = "";
+  }
+}
+
 function createOption(episode){
   const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.number).padStart(2, "0")}`;
-  const option = document.createElement("option")
+  const option = document.createElement("option");
   option.textContent = episodeCode + " - "+ episode.name;
   option.value = episode.id;
   const select = document.getElementById("episodesSelect");
