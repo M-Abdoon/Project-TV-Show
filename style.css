@@ -54,3 +54,20 @@ body {
 #DataSourceWebsite a {
   color: #060b51
 }
+
+#MessagesToUser {
+  text-align: center;
+}
+
+#errorMessage {
+  color: #000;
+    background-color: #ff0000;
+    display: inline-block;
+    margin: 0 auto;
+    font-size: 20px;
+}
+
+#Loading {
+  margin: 0 auto;
+  font-size: 30px;
+}

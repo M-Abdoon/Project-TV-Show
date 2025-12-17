@@ -32,10 +32,24 @@ async function setup() {
     createOption(episode);
   }
 
-  let showEpisodes;
   showsSelect.addEventListener("change", async () =>{
     const valueId = showsSelect.value;
-    
+    document.getElementById("Loading").textContent = "Loading ...";
+    if (valueId === "all") {
+      makePageForEpisodes([]); // clear page
+
+      document.getElementById("episodesSelect").disabled=true;
+      document.getElementById("search-input").disabled=true;
+      document.getElementById("errorMessage").innerHTML =
+       `<div id="errorMessage">Please select a Show to display episodes</div>`;
+
+      return false;
+    }
+
+    document.getElementById("episodesSelect").disabled=false;
+    document.getElementById("search-input").disabled=false;
+    document.getElementById("errorMessage").innerHTML = "";
+
     if (Object.hasOwn(showContainer, valueId)){
     allEpisodes = showContainer[valueId];
     }
@@ -55,6 +69,8 @@ async function setup() {
   episodesSelect.addEventListener("change", async () => {
     const episodeId = episodesSelect.value;
 
+    document.getElementById("Loading").textContent = "Loading ...";
+    
     if (episodeId == "all"){
       makePageForEpisodes(allEpisodes); 
     }
@@ -74,7 +90,7 @@ async function setup() {
 function makePageForEpisodes(episodeList) {
   const rootElem = document.getElementById("root");
   rootElem.innerHTML = "";
-
+  document.getElementById("Loading").innerHTML = "";
 
   episodeList.forEach(episode => {
     const card = document.createElement("div");
