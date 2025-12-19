@@ -1,5 +1,10 @@
-let showContainer = {};
+let allEpisodes   = {};
 let currentShowId = 0;
+
+const currentDisplaying = document.getElementById("currentDisplaying");
+const showsSelect       = document.getElementById("showsSelect");
+const episodesSelect    = document.getElementById("episodesSelect");
+const searchInput       = document.getElementById("search-input");
 
 async function setup() {
   let allShows = await getShows();
@@ -20,26 +25,21 @@ async function setup() {
 
   makePageForShows(allShows);
 
-
-
-
-
-
-
-
   //makePageForEpisodes(allEpisodes);
-  const showsSelect = document.getElementById("showsSelect");
-  const episodesSelect = document.getElementById("episodesSelect");
-  const searchInput = document.getElementById("search-input");
 
-  let allEpisodes = await getData(allShows[currentShowId].id); // Default | for the first load
-  for( const episode of allEpisodes){
-    createOption(episode);
-  }
+  //let allEpisodes = await getData(allShows[currentShowId].id); // Default | for the first load
+
+  //   createOption(episode);
+  // }
 
   searchInput.addEventListener("input", () => {
     const searchWord = searchInput.value.toLowerCase();
-    searchEpisodes(allEpisodes, searchWord);
+    // if show chosen, search in episodes, if not search in shows
+    if(!allEpisodes || Object.keys(allEpisodes).length === 0){
+      searchShows(allShows, searchWord);
+    } else {
+      searchEpisodes(allEpisodes, searchWord);
+    }
   });
 
   showsSelect.addEventListener("change", async () =>{
@@ -61,20 +61,10 @@ async function setup() {
     document.getElementById("search-input").disabled=false;
     document.getElementById("errorMessage").innerHTML = "";
 
-    if (Object.hasOwn(showContainer, currentShowId)){
-    allEpisodes = showContainer[currentShowId];
-    }
-    else{
-      allEpisodes = await getData(currentShowId);
-        
-      document.getElementById("episodesSelect").innerHTML 
-      = `<option value="all">--Select all--</option>`;
-      for( const episode of allEpisodes){
-        createOption(episode);
-      }
-    }
+    allEpisodes = await getData(currentShowId);
+
     makePageForEpisodes(currentShowId);
-  })
+  });
   
   episodesSelect.addEventListener("change", async () => {
     const episodeId = episodesSelect.value;
@@ -94,7 +84,6 @@ async function setup() {
       displayEpisode(selectedEpisode); 
     }
   });
-  
 }
 
 function displayEpisode (selectedEpisode) {
@@ -147,7 +136,7 @@ function makePageForShows(allShows) {
 
     // add click listener
     card.addEventListener("click", () => {
-        makePageForEpisodes(show.id);
+      makePageForEpisodes(show.id);
     });
 
     rootElem.appendChild(card);
@@ -156,12 +145,15 @@ function makePageForShows(allShows) {
 
 async function makePageForEpisodes(showId) {
     let episodeList = await getData(showId);
+
+    currentDisplaying.textContent = "Displaying " + episodeList.length + "/" + episodeList.length + " Episodes"
   const rootElem = document.getElementById("root");
   rootElem.innerHTML = "";
   document.getElementById("Loading").innerHTML = "";
   document.getElementById("backToShowsBtn").style.display = "inline-block";
+  document.getElementById("episodesSelect").disabled = false;
   document.getElementById("episodesSelect").innerHTML = `<option value="all">--Select all--</option>`;
-
+  
   for( const episode of episodeList){
     createOption(episode);
   }
@@ -201,12 +193,8 @@ function searchEpisodes(allEpisodes, searchWord){
   }
   displayEpisode(result);
   
-  const currentDisplaying = document.getElementById("currentDisplaying");
   currentDisplaying.textContent = "Displaying " + result.length + "/" + allEpisodes.length + " Episodes";
 
-  if (searchWord.length == 0) {
-    currentDisplaying.innerHTML = "";
-  }
 }
 
 function searchShows(allShows, searchWord){
@@ -218,12 +206,8 @@ function searchShows(allShows, searchWord){
   }
   displayEpisode(result);
   
-  const currentDisplaying = document.getElementById("currentDisplaying");
-  currentDisplaying.textContent = "Displaying " + result.length + "/" + allEpisodes.length + " Shows";
+  currentDisplaying.textContent = "Displaying " + result.length + "/" + allShows.length + " Shows";
 
-  if (searchWord.length == 0) {
-    currentDisplaying.innerHTML = "";
-  }
 }
 
 function createOption(episode){
