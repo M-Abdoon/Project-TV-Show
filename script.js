@@ -82,6 +82,11 @@ async function setup() {
       displayEpisode(selectedEpisode); 
     }
   });
+
+  backToShowsBtnElm.addEventListener("click", () => {
+	backToShowsBtnElm.style.display = "none";
+	makePageForShows(allShows);
+  });
 }
 
 function displayEpisode (selectedEpisode) {
@@ -225,7 +230,9 @@ function searchEpisodes(allEpisodes, searchWord){
 function searchShows(allShows, searchWord){
   const result = [];
   for ( const show of allShows){
-    if (show.name.toLowerCase().includes(searchWord) || show.summary.toLowerCase().includes(searchWord)){
+    if (show.name.toLowerCase().includes(searchWord) || 
+		show.summary.toLowerCase().includes(searchWord) ||
+		show.genres.join(" ").toLowerCase().includes(searchWord)){
       result.push(show);
     }
   }
