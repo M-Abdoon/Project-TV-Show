@@ -1,4 +1,4 @@
-let allEpisodes		= {};
+let allEpisodes		= [];
 let allShows		= {};
 let currentShowId	= 0;
 
@@ -160,8 +160,9 @@ function makePageForShows(allShows) {
     `;
 
     // add click listener
-    card.addEventListener("click", () => {
-      makePageForEpisodes(show.id);
+    card.addEventListener("click", async () => {
+		allEpisodes = await getData(show.id);
+    	makePageForEpisodes(show.id);
     });
 
     rootElem.appendChild(card);
@@ -189,7 +190,7 @@ async function makePageForEpisodes(showId) {
     const episodeName = episode.name ?? "Name Unavailable";
     let   episodeMediumImage = "img/placeholder.png";
     const episodeSummary = episode.summary ?? "No Summary Available";
-    const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.season).padStart(2, "0")}`;
+    const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.number).padStart(2, "0")}`;
 
     if (episode.image && episode.image.medium)
       episodeMediumImage = episode.image.medium;
