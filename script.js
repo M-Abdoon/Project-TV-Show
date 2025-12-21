@@ -77,6 +77,7 @@ episodesSelectElm.addEventListener("change", async () => {
 			selectedEpisode.push(episode);
 			}
 		}
+	currentDisplayingElm.textContent = "Displaying 1 	/" + allEpisodes.length + " Episodes";
 	displayEpisode(selectedEpisode); 
 	}
 });
@@ -225,6 +226,7 @@ episodeList.forEach(episode => {
 
 	card.addEventListener("click", () => {
 		episodesSelectElm.value = episode.id;
+		currentDisplayingElm.textContent = "Displaying 1 	/" + episodeList.length + " Episodes"
 		displayEpisode([episode]);
 	});
 });
