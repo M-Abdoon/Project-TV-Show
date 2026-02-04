@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>TV Show Project | M-Abdoon</title>
+	<link href="style.css" rel="stylesheet" />
+	<link rel="icon" href="/favicon.ico" type="image/x-icon" />
+</head>
+
+<body>
+	<div id="search">
+		<select id="showsSelect" aria-label="ExploreShows">
+			<option value="all">--Select a show--</option>
+		</select>
+
+		<select id="episodesSelect" aria-label="ExploreEpisodes" disabled>
+			<option value="all">--Select an episode--</option>
+		</select>
+
+		<input id="search-input" type="text" placeholder="Search..." aria-label="SearchEpisodes" disabled />
+		<p id="currentDisplaying"></p>
+		<button id="backToShowsBtn" style="display: none;">Back to Shows</button>
+	</div>
+
+	<div id="MessagesToUser">
+		<div id="pageLoading">Loading ...</div>
+	</div>
+
+	<div id="root"></div>
+
+	<p id="DataSourceWebsite">
+		Data Originally From <a href="https://TVMaze.com" target="_blank">TVMaze.com</a>
+	</p>
+
+	<!-- Frontend JS خفيف فقط -->
+	<script>
+		const showsSelectElm = document.getElementById("showsSelect");
+		const episodesSelectElm = document.getElementById("episodesSelect");
+		const searchInputElm = document.getElementById("search-input");
+		const rootElem = document.getElementById("root");
+		const backToShowsBtnElm = document.getElementById("backToShowsBtn");
+		const currentDisplayingElm = document.getElementById("currentDisplaying");
+		const pageLoadingElm = document.getElementById("pageLoading");
+
+		let allShows = [];
+		let allEpisodes = [];
+		let currentShowId = 0;
+
+		async function getShows() {
+			try {
+				const res = await fetch("/api/shows");
+				const data = await res.json();
+				return Array.isArray(data) ? data : [];
+			} catch (err) {
+				console.error(err);
+				return [];
+			}
+		}
+
+		async function getEpisodes(id) {
+			try {
+				const res = await fetch(`/api/shows/${id}/episodes`);
+				const data = await res.json();
+				return Array.isArray(data) ? data : [];
+			} catch (err) {
+				console.error(err);
+				return [];
+			}
+		}
+
+		function displayShows(shows) {
+			rootElem.innerHTML = "";
+			currentDisplayingElm.textContent = `Displaying ${shows.length}/${allShows.length} Shows`;
+			shows.forEach(show => {
+				const card = document.createElement("div");
+				card.classList.add("card");
+				const showImage = show.image?.medium || "img/placeholder.png";
+				const showSummary = show.summary || "No Summary Available";
+				card.innerHTML = `
+          <h3>${show.name}</h3>
+          <img src="${showImage}" alt="${show.name}">
+          <p>${showSummary}</p>
+          <p>Genres: ${show.genres.join(", ")}</p>
+          <p>Status: ${show.status}</p>
+          <p>Rating: ${show.rating.average || "N/A"}</p>
+          <p>Runtime: ${show.runtime || "N/A"}</p>
+        `;
+				card.addEventListener("click", async () => {
+					currentShowId = show.id;
+					allEpisodes = await getEpisodes(currentShowId);
+					displayEpisodes(allEpisodes);
+					episodesSelectElm.disabled = false;
+					backToShowsBtnElm.style.display = "inline-block";
+				});
+				rootElem.appendChild(card);
+			});
+		}
+
+		function displayEpisodes(episodes) {
+			rootElem.innerHTML = "";
+			currentDisplayingElm.textContent = `Displaying ${episodes.length}/${episodes.length} Episodes`;
+			episodesSelectElm.innerHTML = `<option value="all">--Select all--</option>`;
+			episodes.forEach(ep => {
+				const option = document.createElement("option");
+				option.value = ep.id;
+				option.textContent = `S${String(ep.season).padStart(2, "0")}E${String(ep.number).padStart(2, "0")} - ${ep.name}`;
+				episodesSelectElm.appendChild(option);
+
+				const card = document.createElement("div");
+				card.classList.add("card");
+				const epImage = ep.image?.medium || "img/placeholder.png";
+				card.innerHTML = `
+          <h3>${ep.name} - S${String(ep.season).padStart(2, "0")}E${String(ep.number).padStart(2, "0")}</h3>
+          <img src="${epImage}" alt="${ep.name}">
+          <p>${ep.summary || "No Summary Available"}</p>
+        `;
+				rootElem.appendChild(card);
+			});
+		}
+
+		window.onload = async () => {
+			pageLoadingElm.textContent = "Loading shows...";
+			allShows = await getShows();
+			allShows.sort((a, b) => a.name.localeCompare(b.name));
+			pageLoadingElm.textContent = "";
+			displayShows(allShows);
+
+			showsSelectElm.addEventListener("change", async () => {
+				const showId = showsSelectElm.value;
+				if (showId === "all") {
+					displayShows(allShows);
+					episodesSelectElm.disabled = true;
+					searchInputElm.disabled = false;
+					backToShowsBtnElm.style.display = "none";
+				} else {
+					allEpisodes = await getEpisodes(showId);
+					displayEpisodes(allEpisodes);
+				}
+			});
+
+			episodesSelectElm.addEventListener("change", () => {
+				const epId = episodesSelectElm.value;
+				if (epId === "all") {
+					displayEpisodes(allEpisodes);
+				} else {
+					const ep = allEpisodes.find(e => e.id == epId);
+					displayEpisodes([ep]);
+				}
+			});
+
+			backToShowsBtnElm.addEventListener("click", () => {
+				displayShows(allShows);
+				episodesSelectElm.disabled = true;
+				episodesSelectElm.innerHTML = `<option value="all">--Select all--</option>`;
+				showsSelectElm.value = "all";
+				backToShowsBtnElm.style.display = "none";
+			});
+		};
+	</script>
+</body>
+
+</html>
