@@ -196,22 +196,37 @@ async function makePageForEpisodes(showId) {
 
 	episodeList.forEach(episode => {
 		const card = document.createElement("div");
+		const cardChildDiv = document.createElement("div");
+
 		card.classList.add("card");
-
+		cardChildDiv.classList.add("cardChildDiv");
+		
 		const ep = normalizeEpisode(episode);
-
-		card.innerHTML = `
-			<h3>${escapeHTML(ep.name)} - ${ep.code}</h3>
-			<img src="${ep.image}" alt="${escapeHTML(ep.name)}">
-			<p>${stripHTML(ep.summary)}</p>
+		
+		cardChildDiv.innerHTML = `
+		<h3>${escapeHTML(ep.name)} - ${ep.code}</h3>
+		<img src="${ep.image}" alt="${escapeHTML(ep.name)}">
+		<p>${stripHTML(ep.summary)}</p>
 		`;
-		rootElem.appendChild(card);
 
-		card.addEventListener("click", () => {
+		cardChildDiv.addEventListener("click", () => {
 			episodesSelectElm.value = episode.id;
 			currentDisplayingElm.textContent = "Displaying 1	/" + episodeList.length + " Episodes"
 			displayEpisode([episode]);
 		});
+
+		const likeBtn = document.createElement("button");
+		likeBtn.classList.add("like-btn");
+		likeBtn.innerHTML = "🤍 99";
+
+		likeBtn.addEventListener("click", () => {
+		likeBtn.innerHTML = "❤️ 100";
+		});
+
+		card.appendChild(cardChildDiv);
+		card.appendChild(likeBtn);
+		rootElem.appendChild(card);
+
 	});
 }
 

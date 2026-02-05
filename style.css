@@ -66,11 +66,24 @@ button:hover {
 }
 
 .card {
+	display: flex;
+	flex-direction: column;
 	background: #ffffff;
 	border-radius: 12px;
 	padding: 15px;
 	border: 1px solid #ddd;
 	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.like-btn {
+	margin-top: auto;
+	align-self: flex-start;
+	background: #7a7a7a;
+	border: none;
+	padding: 6px 12px;
+	border-radius: 20px;
+	cursor: pointer;
+	font-size: 14px;
 }
 
 .card:hover {
