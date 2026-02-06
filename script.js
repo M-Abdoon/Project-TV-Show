@@ -1,3 +1,5 @@
+import { localLikesData } from "/storage.js";
+
 let allEpisodes		= [];
 let allShows		= {};
 let episodeCache	= {};
@@ -183,6 +185,11 @@ function makePageForShows(allShows) {
 async function makePageForEpisodes(showId) {
 	let episodeList = await getData(showId);
 
+	if(!localStorage.getItem(`likesInLocalStorage-${showId}`)) {
+		let localLikes = localLikesData()[showId];
+		localStorage[`likesInLocalStorage-${showId}`] = JSON.stringify(localLikes);
+	}
+
 	currentDisplayingElm.textContent = "Displaying " + episodeList.length + "/" + episodeList.length + " Episodes"
 	rootElem.innerHTML = "";
 	pageLoadingElm.innerHTML = "";
@@ -190,28 +197,55 @@ async function makePageForEpisodes(showId) {
 	episodesSelectElm.disabled = false;
 	episodesSelectElm.innerHTML = `<option value="all">--Select all--</option>`;
 
+
 	for (const episode of episodeList) {
 		createOption(episode);
 	}
 
 	episodeList.forEach(episode => {
 		const card = document.createElement("div");
+		const cardChildDiv = document.createElement("div");
+
 		card.classList.add("card");
-
+		cardChildDiv.classList.add("cardChildDiv");
+		
 		const ep = normalizeEpisode(episode);
-
-		card.innerHTML = `
-			<h3>${escapeHTML(ep.name)} - ${ep.code}</h3>
-			<img src="${ep.image}" alt="${escapeHTML(ep.name)}">
-			<p>${stripHTML(ep.summary)}</p>
+		
+		cardChildDiv.innerHTML = `
+		<h3>${escapeHTML(ep.name)} - ${ep.code}</h3>
+		<img src="${ep.image}" alt="${escapeHTML(ep.name)}">
+		<p>${stripHTML(ep.summary)}</p>
 		`;
-		rootElem.appendChild(card);
 
-		card.addEventListener("click", () => {
+		cardChildDiv.addEventListener("click", () => {
 			episodesSelectElm.value = episode.id;
 			currentDisplayingElm.textContent = "Displaying 1	/" + episodeList.length + " Episodes"
 			displayEpisode([episode]);
 		});
+
+		// regarding likes
+		let parsedLikes = JSON.parse(localStorage[`likesInLocalStorage-${showId}`]);
+		let episodeLikesObj = parsedLikes.find(ep => ep.hasOwnProperty(episode.name));
+		let episodeLikes = episodeLikesObj ? episodeLikesObj[episode.name] : false;
+
+		const likeBtn = document.createElement("button");
+		likeBtn.classList.add("like-btn");
+		likeBtn.innerHTML = `🤍 ${episodeLikes}`;
+
+
+		likeBtn.addEventListener("click", () => {
+			if(episodeLikesObj) {
+				episodeLikesObj[episode.name]+=1;
+				localStorage[`likesInLocalStorage-${showId}`] = JSON.stringify(parsedLikes);
+			}
+			likeBtn.innerHTML = `❤️ ${episodeLikes + 1}`;
+
+		});
+
+		card.appendChild(cardChildDiv);
+		card.appendChild(likeBtn);
+		rootElem.appendChild(card);
+
 	});
 }
 
@@ -322,9 +356,3 @@ function stripHTML(str) {
 }
 
 window.onload = setup;
-
-card.innerHTML = `
-  <h3>${ep.name} - ${ep.code}</h3>
-  <img src="${ep.image}" alt="${ep.name}">
-  <p>${ep.summary}</p>
-`;
