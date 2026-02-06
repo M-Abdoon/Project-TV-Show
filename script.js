@@ -1,3 +1,5 @@
+import { localLikesData } from "/storage.js";
+
 let allEpisodes		= [];
 let allShows		= {};
 let episodeCache	= {};
@@ -183,12 +185,18 @@ function makePageForShows(allShows) {
 async function makePageForEpisodes(showId) {
 	let episodeList = await getData(showId);
 
+	if(!localStorage.getItem(`likesInLocalStorage-${showId}`)) {
+		let localLikes = localLikesData()[showId];
+		localStorage[`likesInLocalStorage-${showId}`] = JSON.stringify(localLikes);
+	}
+
 	currentDisplayingElm.textContent = "Displaying " + episodeList.length + "/" + episodeList.length + " Episodes"
 	rootElem.innerHTML = "";
 	pageLoadingElm.innerHTML = "";
 	backToShowsBtnElm.style.display = "inline-block";
 	episodesSelectElm.disabled = false;
 	episodesSelectElm.innerHTML = `<option value="all">--Select all--</option>`;
+
 
 	for (const episode of episodeList) {
 		createOption(episode);
@@ -215,12 +223,23 @@ async function makePageForEpisodes(showId) {
 			displayEpisode([episode]);
 		});
 
+		// regarding likes
+		let parsedLikes = JSON.parse(localStorage[`likesInLocalStorage-${showId}`]);
+		let episodeLikesObj = parsedLikes.find(ep => ep.hasOwnProperty(episode.name));
+		let episodeLikes = episodeLikesObj ? episodeLikesObj[episode.name] : false;
+
 		const likeBtn = document.createElement("button");
 		likeBtn.classList.add("like-btn");
-		likeBtn.innerHTML = "🤍 99";
+		likeBtn.innerHTML = `🤍 ${episodeLikes}`;
+
 
 		likeBtn.addEventListener("click", () => {
-		likeBtn.innerHTML = "❤️ 100";
+			if(episodeLikesObj) {
+				episodeLikesObj[episode.name]+=1;
+				localStorage[`likesInLocalStorage-${showId}`] = JSON.stringify(parsedLikes);
+			}
+			likeBtn.innerHTML = `❤️ ${episodeLikes + 1}`;
+
 		});
 
 		card.appendChild(cardChildDiv);
@@ -337,9 +356,3 @@ function stripHTML(str) {
 }
 
 window.onload = setup;
-
-card.innerHTML = `
-  <h3>${ep.name} - ${ep.code}</h3>
-  <img src="${ep.image}" alt="${ep.name}">
-  <p>${ep.summary}</p>
-`;
