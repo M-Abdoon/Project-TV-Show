@@ -126,7 +126,13 @@ function displayShow(selectedShow) {
 
 		const showName = show.name ?? "Name Unavailable";
 		let showMediumImage = "img/placeholder.png";
-		const showSummary = show.summary ?? "No Summary Available";
+		//const showSummary = show.summary ?? "No Summary Available";
+		const showSummary = "";
+
+		if (!show.summary)
+			showSummary = "No Summary Available";
+		else
+			showSummary = show.summary;
 
 		if (show.image && show.image.medium)
 			showMediumImage = show.image.medium;
